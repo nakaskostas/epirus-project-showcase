@@ -1,0 +1,76 @@
+
+# Product Requirements Document (PRD) for Epirus Project Showcase Website Generator
+
+## 1. Overview
+
+The goal is to create a web application that automatically generates a static showcase website for projects of the Epirus Region. This process will be driven by an LLM agent, which will use a CLI tool to perform the necessary tasks. The final output will be a modern, single-page website built with Next.js and Tailwind CSS.
+
+## 2. The Existing Application
+
+The current application in the `App` folder is a CLI tool that performs the first step of the process: organizing project files.
+
+### 2.1. Functionality
+
+- **`organize` command**:
+  - Takes a source directory (or a GitHub repository URL) as input.
+  - Scans the source for multimedia files.
+  - Categorizes files based on their type (images, videos, documents, etc.).
+  - Copies the categorized files into a structured output directory (`public/assets` by default).
+
+### 2.2. Technology Stack
+
+- Node.js
+- `commander` for the CLI interface.
+- `fs-extra` for file system operations.
+- `glob` for file searching.
+- `simple-git` for cloning Git repositories.
+- `rimraf` for cleaning up temporary files.
+
+## 3. Desired Web Application
+
+The final web application should be a static, single-page website that presents the project's multimedia files in a modern and engaging way.
+
+### 3.1. Core Functionality
+
+The LLM agent will use the CLI tool to perform two main steps:
+
+**Step 1: Organize Files (Already Implemented)**
+
+The agent will use the existing `organize` command to process the project's files. This functionality should be preserved.
+
+**Step 2: Generate Website (To Be Implemented)**
+
+A new command, `generate`, will be added to the CLI tool. This command will:
+
+- Take the organized files from the `public/assets` directory as input.
+- Generate a Next.js/Tailwind CSS website based on these files.
+- The generated website should be a single page with a navigation menu that uses anchors to scroll to different sections.
+
+### 3.2. Website Structure and UI
+
+- **Single-Page Layout**: All content will be on a single page, with a navigation bar at the top.
+- **Navigation**: The navigation bar will contain links that scroll to the corresponding sections of the page (e.g., "Images", "Videos", "Documents").
+- **Modern Design**: The UI should be clean, modern, and visually appealing, with an emphasis on showcasing the multimedia content.
+- **Content Presentation**:
+  - **Images**: Displayed in a gallery format (e.g., a grid of thumbnails that open in a lightbox when clicked).
+  - **Videos**: Embedded in the page with player controls.
+  - **Documents (PDF, Word, etc.)**: The text content of these documents should be extracted and displayed on the page, possibly next to relevant images or videos. The original document should also be available for download.
+  - **Other Files**: Other file types should be listed with links for downloading.
+
+### 3.3. Technology Stack
+
+- **Frontend Framework**: Next.js (React)
+- **Styling**: Tailwind CSS
+
+## 4. Instructions for the LLM Agent
+
+The LLM agent should be able to:
+
+1.  **Understand the existing `App` directory**: The agent should be able to read and understand the existing code, especially the `organize` command.
+2.  **Implement the `generate` command**: The agent should add a new `generate` command to `index.js` and create a new script (e.g., `scripts/generateWebsite.js`) to handle the website generation logic.
+3.  **Generate the Next.js website**: The `generateWebsite.js` script should:
+    - Programmatically create the necessary Next.js pages and components.
+    - Read the organized files from `public/assets`.
+    - Create the different sections of the website (image gallery, video player, document display).
+    - Style the website using Tailwind CSS.
+4.  **Execute the commands**: The agent should be able to run the `organize` and `generate` commands from the CLI to create the final website.
