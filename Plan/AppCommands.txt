@@ -2,3 +2,6 @@
 Για local φάκελο: node index.js organize ../testtest
 Για Github: node index.js organize https://github.com/nakaskostas/epirus-project-showcase-testFiles
 
+--Εντολές για Web Page Organize
+Για να ξεκινήσει ο server: npm run start:web
+Link: http://localhost:3000

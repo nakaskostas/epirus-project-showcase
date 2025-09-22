@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:web": "node server.js"
   },
   "keywords": [
     "cli",
@@ -18,9 +19,10 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^12.1.0",
+    "express": "^5.1.0",
     "fs-extra": "^11.2.0",
     "glob": "^10.4.1",
-    "simple-git": "^3.24.0",
-    "rimraf": "^5.0.7"
+    "rimraf": "^5.0.7",
+    "simple-git": "^3.24.0"
   }
 }

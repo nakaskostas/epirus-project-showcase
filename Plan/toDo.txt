@@ -1,0 +1,3 @@
+-Tο Locan file organize στο webpage δε λειτουργεί σωστα
+
+-Να φτιάξω το UI του Organize webpage να πετάει pop up windows επιβεβαίωσης organize

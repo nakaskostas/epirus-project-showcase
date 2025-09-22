@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epirus Project Organizer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            --primary-blue: #007bff;
+            --primary-blue-dark: #0056b3;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #343a40;
+            --text-color: #212529;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-gray);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 550px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--dark-gray);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 0.85rem;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dark-gray);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .tab-button.active {
+            background-color: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-content p {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #6c757d;
+        }
+
+        input[type="text"], .file-input-wrapper {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus, .file-input-wrapper:focus-within {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            right: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            color: #6c757d;
+        }
+
+        button#organize-btn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button#organize-btn:hover {
+            background-color: var(--primary-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        #output {
+            margin-top: 2rem;
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Project Organizer</h1>
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('local')">Local Folder</button>
+            <button class="tab-button" onclick="showTab('github')">GitHub URL</button>
+        </div>
+
+        <div id="local" class="tab-content active">
+            <p>Select the project folder on your computer:</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="local-source" webkitdirectory directory onchange="updateFileName(this)">
+                <span class="file-input-label">Click to select a folder...</span>
+            </div>
+        </div>
+
+        <div id="github" class="tab-content">
+            <p>Enter the GitHub repository URL:</p>
+            <input type="text" id="github-source" placeholder="https://github.com/user/repo">
+        </div>
+
+        <button id="organize-btn" onclick="organize()">Organize</button>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        let activeTab = 'local';
+
+        function showTab(tabName) {
+            activeTab = tabName;
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        function updateFileName(input) {
+            const label = input.nextElementSibling;
+            if (input.files && input.files.length > 0) {
+                label.textContent = `${input.files.length} files selected from "${input.files[0].webkitRelativePath.split('/')[0]}"`;
+            } else {
+                label.textContent = 'Click to select a folder...';
+            }
+        }
+
+        function organize() {
+            const output = document.getElementById('output');
+            output.innerHTML = 'Starting organization...\n';
+
+            let sourceType = activeTab;
+            let source;
+
+            if (sourceType === 'local') {
+                const files = document.getElementById('local-source').files;
+                if (files.length === 0) {
+                    output.innerHTML += '[ERROR] Please select a directory.\n';
+                    return;
+                }
+                // Deriving the folder name from the relative path of the first file.
+                source = files[0].webkitRelativePath.split('/')[0];
+
+            } else {
+                source = document.getElementById('github-source').value;
+                if (!source) {
+                    output.innerHTML += '[ERROR] Please enter a GitHub URL.\n';
+                    return;
+                }
+            }
+
+            fetch('/organize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sourceType, source }),
+            })
+            .then(response => {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                function read() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            output.innerHTML += '\n[DONE] Process finished.\n';
+                            output.scrollTop = output.scrollHeight;
+                            return;
+                        }
+                        const chunk = decoder.decode(value, { stream: true });
+                        const messages = chunk.split('\n\n');
+                        messages.forEach(message => {
+                            if (message.startsWith('data: ')) {
+                                const data = message.substring(6);
+                                if(data.includes('[DONE]')) {
+                                    output.innerHTML += `\n${data}\n`;
+                                } else {
+                                    output.innerHTML += data;
+                                }
+                                output.scrollTop = output.scrollHeight;
+                            }
+                        });
+                        read();
+                    });
+                }
+                read();
+            })
+            .catch(error => {
+                output.innerHTML += `\n[ERROR] ${error.toString()}\n`;
+                output.scrollTop = output.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>
