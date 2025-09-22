@@ -1,0 +1,26 @@
+{
+  "name": "epirus-project-showcase-automator",
+  "version": "1.0.0",
+  "description": "A CLI tool to automatically generate project showcase websites for the Epirus Region.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "automation",
+    "static-site-generator",
+    "astro"
+  ],
+  "author": "Gemini Code Assist",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.4.1",
+    "simple-git": "^3.24.0",
+    "rimraf": "^5.0.7"
+  }
+}

@@ -1,0 +1,4 @@
+--Organize Files
+Για local φάκελο: node index.js organize ../testtest
+Για Github: node index.js organize https://github.com/nakaskostas/epirus-project-showcase-testFiles
+
