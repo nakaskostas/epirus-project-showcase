@@ -20,7 +20,13 @@ const fileTypeMappings = {
  * @returns {string} The category name (e.g., 'images', 'videos') or 'others'.
  */
 function getFileCategory(filePath) {
-    const extension = path.extname(filePath).toLowerCase();
+    const extension = path.extname(filePath).toLowerCase();    
+    
+    // Special case for PDFs to go into documents/pdf
+    if (extension === '.pdf') {
+        return path.join('documents', 'pdf');
+    }
+
     for (const category in fileTypeMappings) {
         if (fileTypeMappings[category].includes(extension)) {
             return category;
