@@ -3,4 +3,5 @@
 ✅ -Να φτιάξω το UI του Organize webpage να πετάει pop up windows επιβεβαίωσης organize 
 
 - Να κάνω merge τα LocalPath και GithubURL σε ενα πεδίο εισαγωγής στο webpage.
+
 - Να τσεκάρω όταν γίνεται error στο organize να εμφανίζεται pop up μηνυμα
