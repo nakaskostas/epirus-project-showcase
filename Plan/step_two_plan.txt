@@ -1,0 +1,91 @@
+### Σχέδιο Υλοποίησης για το Βήμα 2: Αυτόματη Δημιουργία Ιστοσελίδας Παρουσίασης
+
+#### Στρατηγική Υλοποίησης
+
+Η κεντρική ιδέα είναι να δημιουργήσουμε μια διαδικασία δύο σταδίων:
+1.  **Ανάλυση & Καταγραφή (Data Extraction):** Ένα script θα "διαβάζει" τον οργανωμένο φάκελο `assets` και θα δημιουργεί ένα αρχείο-κατάλογο (ας το πούμε `manifest.json`) που θα περιγράφει όλο το περιεχόμενο.
+2.  **Παρουσίαση (Rendering):** Μια εφαρμογή Next.js θα διαβάζει αυτό το `manifest.json` και θα "ζωγραφίζει" τη σελίδα, δημιουργώντας δυναμικά τα κατάλληλα sections (galleries, video players, κείμενα) με βάση το περιεχόμενο.
+
+---
+
+#### Βήμα 2.1: Δημιουργία του "Καταλόγου" (`manifest.json`)
+
+Αυτό είναι το πιο κρίσιμο βήμα. Πρέπει να μετατρέψουμε τη δομή των φακέλων σε μια δομή δεδομένων που μπορεί να καταλάβει η ιστοσελίδα.
+
+1.  **Νέα Εντολή στο CLI:** Θα δημιουργήσουμε μια νέα εντολή, π.χ., `generate`, στο υπάρχον CLI εργαλείο. Αυτή η εντολή θα εκτελεί ένα νέο script.
+2.  **Το Script `generate-manifest.js`:**
+    *   **Σκοπός:** Να σκανάρει τον φάκελο `public/assets`.
+    *   **Λειτουργία:**
+        *   Θα χρησιμοποιήσει τη βιβλιοθήκη `glob` για να βρει όλα τα αρχεία μέσα στους υποφακέλους (`images`, `videos`, `documents`, `cad`).
+        *   Για κάθε αρχείο, θα συλλέγει πληροφορίες:
+            *   `type`: Η κατηγορία του (π.χ., 'image', 'video').
+            *   `path`: Η σχετική διαδρομή του (π.χ., `/assets/images/photo1.jpg`).
+            *   `name`: Το όνομά του (`photo1.jpg`).
+        *   **(Προχωρημένο):** Για τα αρχεία κειμένου (`.pdf`, `.docx`), θα χρησιμοποιεί βιβλιοθήκες όπως `pdf-parse` και `mammoth` για να εξάγει το περιεχόμενό τους ως απλό κείμενο.
+    *   **Αποτέλεσμα:** Θα δημιουργεί ένα αρχείο `public/manifest.json` με την παρακάτω δομή:
+
+    ```json
+    {
+      "projectName": "Example Project",
+      "generationDate": "2024-07-29T10:00:00Z",
+      "assets": {
+        "images": [
+          { "path": "/assets/images/landscape.jpg", "name": "landscape.jpg" },
+          { "path": "/assets/images/building.png", "name": "building.png" }
+        ],
+        "videos": [
+          { "path": "/assets/videos/drone-footage.mp4", "name": "drone-footage.mp4" }
+        ],
+        "documents": [
+          { 
+            "path": "/assets/documents/project-description.pdf", 
+            "name": "project-description.pdf",
+            "textContent": "Αυτό είναι το κείμενο που εξήχθη από το PDF..." 
+          }
+        ],
+        "cad": [
+          { "path": "/assets/cad/floor-plan.dwg", "name": "floor-plan.dwg" }
+        ]
+      }
+    }
+    ```
+
+#### Βήμα 2.2: Δημιουργία της Εφαρμογής Παρουσίασης (Next.js)
+
+Τώρα που έχουμε τα δεδομένα μας οργανωμένα στο `manifest.json`, χτίζουμε το frontend που θα τα παρουσιάσει.
+
+1.  **Setup Next.js & Tailwind CSS:** Δημιουργούμε ένα νέο Next.js project.
+2.  **Κεντρική Σελίδα (`pages/index.js`):**
+    *   Αυτή θα είναι η μοναδική σελίδα της εφαρμογής.
+    *   Θα χρησιμοποιήσει τη συνάρτηση `getStaticProps` του Next.js για να διαβάσει το `public/manifest.json` κατά τη διάρκεια του build.
+    *   Τα δεδομένα από το manifest θα περάσουν ως `props` στο React component της σελίδας.
+3.  **Δυναμική Δημιουργία Sections:**
+    *   Το component της σελίδας θα ελέγχει τα δεδομένα που έλαβε.
+    *   Αν `props.assets.images` υπάρχει και δεν είναι άδειο, θα εμφανίζει το component `<ImageGallery images={props.assets.images} />`.
+    *   Αν `props.assets.videos` υπάρχει, θα εμφανίζει το component `<VideoSection videos={props.assets.videos} />`.
+    *   Αν `props.assets.documents` υπάρχει, θα εμφανίζει το component `<DocumentsSection documents={props.assets.documents} />`.
+    *   Και ούτω καθεξής.
+
+#### Βήμα 2.3: Δημιουργία των Components Παρουσίασης
+
+Αυτά είναι τα "τουβλάκια" που θα συνθέσουν την τελική σελίδα.
+
+*   **`<ImageGallery />`:**
+    *   Θα δέχεται μια λίστα με τις εικόνες.
+    *   Θα τις εμφανίζει σε ένα μοντέρνο grid.
+    *   Για το UI, μπορούμε να χρησιμοποιήσουμε έτοιμες βιβλιοθήκες όπως `Swiper.js` για ένα carousel ή `PhotoSwipe` για ένα lightbox gallery που ανοίγει τις εικόνες σε πλήρη οθόνη.
+*   **`<VideoSection />`:**
+    *   Θα ενσωματώνει τα βίντεο χρησιμοποιώντας το HTML tag `<video>`.
+    *   Για καλύτερη εμπειρία, μπορούμε να χρησιμοποιήσουμε βιβλιοθήκες όπως το `Plyr` ή το `Video.js` που προσφέρουν ένα πιο όμορφο και λειτουργικό player.
+*   **`<DocumentsSection />`:**
+    *   Θα εμφανίζει το `textContent` που εξάγαμε από τα έγγραφα.
+    *   Θα παρέχει και έναν σύνδεσμο για download του αρχικού αρχείου (π.χ., "Κατεβάστε το PDF").
+*   **`<Navigation />`:**
+    *   Ένα component στην κορυφή της σελίδας που θα δημιουργεί δυναμικά anchor links (`<a href="#images">Εικόνες</a>`, `<a href="#videos">Βίντεο</a>`) για κάθε section που υπάρχει στη σελίδα.
+
+#### Συνολική Ροή Εργασίας (Workflow)
+
+1.  **Εκτέλεση `organize`:** Ο χρήστης (ή ο agent) εκτελεί την εντολή `organize` για να ταξινομήσει τα αρχεία στον φάκελο `public/assets`.
+2.  **Εκτέλεση `generate`:** Αμέσως μετά, εκτελείται η νέα εντολή `generate` που δημιουργεί το `public/manifest.json`.
+3.  **Εκτέλεση `next build` & `next export`:** Ο agent εκτελεί τις εντολές του Next.js για να δημιουργήσει την τελική, στατική ιστοσελίδα.
+4.  **Αποτέλεσμα:** Ένας φάκελος `out` που περιέχει το πλήρες, αυτόνομο website, έτοιμο για ανέβασμα σε οποιονδήποτε hosting provider (Vercel, Cloudflare Pages, etc.).
