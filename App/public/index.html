@@ -22,6 +22,7 @@
             background-color: var(--background-color);
             display: flex;
             justify-content: center;
+            flex-direction: column; /* Align items vertically */
             align-items: center;
             height: 100vh;
             margin: 0;
@@ -40,9 +41,18 @@
 
         h1 {
             text-align: center;
-            color: var(--heading-color);
             margin-bottom: 2rem;
-            font-weight: 600;
+            font-weight: 700; /* Bolder text */
+            font-size: 2.2rem; /* Larger font size */
+            letter-spacing: 1px;
+
+            /* --- Impressive Gradient Effect --- */
+            background: linear-gradient(90deg, var(--primary-color), #c3eaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         }
 
         .tabs {
@@ -137,6 +147,57 @@
             border: 1px solid var(--border-color);
         }
 
+        /* Loader Styles */
+        .loader-container {
+            margin-top: 1.5rem;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+
+        .loader-container.visible {
+            display: block;
+        }
+
+        .loader {
+            width: 64px;
+            height: 64px;
+            display: inline-block;
+            position: relative;
+        }
+        .loader::after,
+        .loader::before {
+            content: '';  
+            box-sizing: border-box;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 3px solid var(--heading-color);
+            position: absolute;
+            left: 0;
+            top: 0;
+            animation: animloader 2s linear infinite;
+        }
+        .loader::after {
+            animation-delay: 1s;
+        }
+
+        @keyframes animloader {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        #progress-text {
+            display: block;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -180,7 +241,24 @@
         .modal-content h2 {
             margin-top: 0;
             margin-bottom: 1rem;
-            color: var(--heading-color);
+            color: var(--heading-color); /* Fallback color */
+        }
+
+        /* Gradient text for modal titles */
+        .gradient-text-success {
+            background: linear-gradient(90deg, var(--primary-color), #c3eaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .gradient-text-error {
+            background: linear-gradient(90deg, #ff6b6b, #ffb8b8); /* Red gradient for errors */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
         }
 
         .modal-content p {
@@ -209,24 +287,20 @@
 <body>
     <div class="container">
         <h1>Project Organizer</h1>
-        <div class="tabs">
-            <button class="tab-button active" onclick="showTab('local')">Local Folder</button>
-            <button class="tab-button" onclick="showTab('github')">GitHub URL</button>
-        </div>
+        
+        <p>Enter the project's local folder path or GitHub repository URL:</p>
+        <input type="text" id="source-input" placeholder="e.g., C:\Users\...\project or https://github.com/user/repo">
 
-        <div id="local" class="tab-content active">
-            <p>Enter the full path to the project folder on your computer:</p>
-            <input type="text" id="local-source" placeholder="e.g., C:\Users\YourUser\Desktop\testtest">
-        </div>
-
-        <div id="github" class="tab-content">
-            <p>Enter the GitHub repository URL:</p>
-            <input type="text" id="github-source" placeholder="https://github.com/user/repo">
-        </div>
 
         <button id="organize-btn" onclick="organize()">Organize</button>
 
         <div id="output"></div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader-container" class="loader-container">
+        <span class="loader"></span>
+        <span id="progress-text"></span>
     </div>
 
     <!-- Modal for result -->
@@ -239,22 +313,19 @@
     </div>
 
     <script>
-        let activeTab = 'local';
-
-        function showTab(tabName) {
-            activeTab = tabName;
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-        }
-
         function showModal(title, message, isSuccess) {
-            document.getElementById('modal-title').innerText = title;
+            const modalTitle = document.getElementById('modal-title');
+            modalTitle.innerText = title;
             document.getElementById('modal-message').innerText = message;
-            const modal = document.getElementById('result-modal');            
             
+            // Apply gradient style based on success or error
+            modalTitle.classList.remove('gradient-text-success', 'gradient-text-error');
+            if (isSuccess) {
+                modalTitle.classList.add('gradient-text-success');
+            } else {
+                modalTitle.classList.add('gradient-text-error');
+            }
+            const modal = document.getElementById('result-modal');
             modal.classList.add('visible');
         }
 
@@ -263,31 +334,41 @@
         }
 
         function organize() {
+            const organizeBtn = document.getElementById('organize-btn');
             const output = document.getElementById('output');
-            output.style.display = 'block';
+            const loaderContainer = document.getElementById('loader-container');
+            const progressText = document.getElementById('progress-text');
+
+            // Reset and show loader
+            loaderContainer.classList.add('visible');
+            progressText.innerText = '0%';
+
+            // Hide old output and disable button
+            output.style.display = 'none';
             output.innerHTML = 'Starting organization...\n';
-            document.getElementById('organize-btn').disabled = true;
+            organizeBtn.disabled = true;
 
-            let sourceType = activeTab;
-            let source;
-
-            if (sourceType === 'local') {
-                source = document.getElementById('local-source').value;
-                if (!source) {
-                    document.getElementById('organize-btn').disabled = false;
-                    output.innerHTML += '[ERROR] Please enter a local folder path.\n';
-                    return;
-                }
-                
-            } else {
-                source = document.getElementById('github-source').value;
-                if (!source) {
-                    document.getElementById('organize-btn').disabled = false;
-                    output.innerHTML += '[ERROR] Please enter a GitHub URL.\n';
-                    return;
-                }
+            let source = document.getElementById('source-input').value;
+            if (!source) {
+                organizeBtn.disabled = false;
+                loaderContainer.classList.remove('visible');
+                showModal('Error!', 'Please provide a local path or a GitHub URL.', false);
+                output.innerHTML += '[ERROR] Please provide a local path or a GitHub URL.\n';
+                return;
             }
 
+            let sourceType;
+            if ((source.startsWith('http://') || source.startsWith('https://')) && source.includes('github.com')) {
+                sourceType = 'github';
+                // Sanitize URL: remove trailing .git if it exists
+                if (source.endsWith('.git')) {
+                    source = source.slice(0, -4);
+                }
+            } else {
+                sourceType = 'local';
+                // For local files, we can simulate a quick progress
+                progressText.innerText = '50%';
+            }
             fetch('/organize', {
                 method: 'POST',
                 headers: {
@@ -303,10 +384,15 @@
                 function read() {
                     reader.read().then(({ done, value }) => {
                         if (done) {
-                            output.innerHTML += '\n[DONE] Process finished.\n';
-                            output.scrollTop = output.scrollHeight;
-                            document.getElementById('organize-btn').disabled = false;
-                            if(processSuccess) showModal('Success!', 'The files have been organized successfully.', true);
+                            progressText.innerText = '100%';
+                            organizeBtn.disabled = false;
+                            
+                            if(processSuccess) {
+                                showModal('Success!', 'The files have been organized successfully.', true);
+                            }
+                            setTimeout(() => {
+                                loaderContainer.classList.remove('visible');
+                            }, 2000);
                             return;
                         }
                         const chunk = decoder.decode(value, { stream: true });
@@ -318,11 +404,16 @@
                                     processSuccess = false;
                                     showModal('Error!', 'The organization process failed. Check the output for details.', false);
                                 }
-                                if(data.includes('[DONE]')) {
-                                    output.innerHTML += `\n${data}\n`;
-                                } else {
-                                    output.innerHTML += data;
+
+                                // Update progress bar based on server messages
+                                const progressMatch = data.match(/(\d+)% complete/); // e.g., "git.clone resolving stage 50% complete"
+                                if (progressMatch) {
+                                    const percent = progressMatch[1];
+                                    progressText.innerText = `${percent}%`;
                                 }
+
+                                // Log to hidden output for debugging
+                                output.innerHTML += data;
                                 output.scrollTop = output.scrollHeight;
                             }
                         });
@@ -332,7 +423,8 @@
                 read();
             })
             .catch(error => {
-                document.getElementById('organize-btn').disabled = false;
+                organizeBtn.disabled = false;
+                loaderContainer.classList.remove('visible');
                 showModal('Connection Error', `Failed to connect to the server: ${error.toString()}`, false);
                 output.innerHTML += `\n[ERROR] ${error.toString()}\n`;
                 output.scrollTop = output.scrollHeight;

@@ -62,8 +62,19 @@ export async function organizeFiles(source, options) {
             }
             await fs.ensureDir(sourcePath);
 
-            const git = simpleGit();
-            await git.clone(source, sourcePath, ['--no-hardlinks']);
+            const git = simpleGit({
+                progress({ method, stage, progress }) {
+                    // Provides real-time feedback in the output console for long-running git operations.
+                    console.log(`git.${method} ${stage} stage ${progress}% complete`);
+                },
+            });
+
+            // Use a shallow clone (--depth 1) to fetch only the latest commit,
+            // which is much faster and requires less data.
+            await git.clone(source, sourcePath, [
+                '--depth', '1',
+                '--no-hardlinks'
+            ]);
             console.log('Repository cloned successfully.');
 
         } else {
