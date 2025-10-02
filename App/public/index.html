@@ -333,6 +333,17 @@
             document.getElementById('result-modal').classList.remove('visible');
         }
 
+        // Add event listener to input for Enter key
+        document.getElementById('source-input').addEventListener('keyup', function(event) {
+            // Check if the key pressed was 'Enter'
+            if (event.key === 'Enter') {
+                // Prevent default action (like form submission)
+                event.preventDefault();
+                // Trigger the button's click event
+                document.getElementById('organize-btn').click();
+            }
+        });
+
         function organize() {
             const organizeBtn = document.getElementById('organize-btn');
             const output = document.getElementById('output');

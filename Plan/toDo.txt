@@ -5,3 +5,6 @@
 ✅- Να κάνω merge τα LocalPath και GithubURL σε ενα πεδίο εισαγωγής στο webpage.
 
 ?? - Να τσεκάρω όταν γίνεται error στο organize να εμφανίζεται pop up μηνυμα
+
+- Να κανω πιο γρηγορο το organize από repositories του GitHub, εντοή git clone στο server.js να της προσθέσω --depth 1.
+
